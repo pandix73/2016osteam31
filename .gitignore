@@ -1,0 +1,9 @@
+*.o
+*.coff
+nachos
+halt
+.Xauthority
+.bash_history
+.ssh/
+.viminfo
+.vimrc
