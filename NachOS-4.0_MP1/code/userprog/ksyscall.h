@@ -21,6 +21,11 @@ void SysHalt()
   kernel->interrupt->Halt();
 }
 
+void SysPrintInt(int number)
+{
+	kernel->interrupt->PrintInt(number);
+}
+
 int SysAdd(int op1, int op2)
 {
   return op1 + op2;

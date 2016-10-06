@@ -239,6 +239,12 @@ Interrupt::Halt()
     delete kernel;	// Never returns.
 }
 
+void
+Interrupt::PrintInt(int number){
+	cout << "interrupt" << number << endl;
+	kernel->PrintInt(number);
+}
+
 int
 Interrupt::CreateFile(char *filename)
 {
