@@ -182,23 +182,20 @@ void
 ConsoleOutput::PrintInt(int number)
 {
     ASSERT(putBusy == FALSE);
-    char output[12];
+    char output[10] = {0};
 	int i, index = 0;
-	bool neg;
-	if(number < 0){
-		neg = true;
-		number *= -1;
-	}
-	while(number){
+	while(1){
 		output[index++] = number % 10 + '0';
 		number /= 10;
+		if(number == 0)break;
 	}
-	if(neg)output[index++] = '-';
 	for(i = 0; i < index/2; i++){
-		output[i] ^= output[index-1-i] ^= output[i] ^= output[index-1-i];
+		output[i] ^= output[index-1-i];
+		output[index-1-i] ^= output[i];
+		output[i] ^= output[index-1-i];
 	}
 	output[index++] = '\n';
-    WriteFile(writeFileNo, output, sizeof(char)*index);
+    WriteFile(writeFileNo, output, index);
     putBusy = TRUE;
     kernel->interrupt->Schedule(this, ConsoleTime, ConsoleWriteInt);
 }
