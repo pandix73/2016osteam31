@@ -172,3 +172,34 @@ ConsoleOutput::PutChar(char ch)
     kernel->interrupt->Schedule(this, ConsoleTime, ConsoleWriteInt);
 }
 
+//----------------------------------------------------------------------
+// ConsoleOutput::PrintInt()
+// 	Write a integer to the simulated display, schedule an interrupt 
+//	to occur in the future, and return.
+//----------------------------------------------------------------------
+
+void
+ConsoleOutput::PrintInt(int number)
+{
+    ASSERT(putBusy == FALSE);
+    char output[12];
+	int i, index = 0;
+	bool neg;
+	if(number < 0){
+		neg = true;
+		number *= -1;
+	}
+	while(number){
+		output[index++] = number % 10 + '0';
+		number /= 10;
+	}
+	if(neg)output[index++] = '-';
+	for(i = 0; i < index/2; i++){
+		output[i] ^= output[index-1-i] ^= output[i] ^= output[index-1-i];
+	}
+	output[index++] = '\n';
+    WriteFile(writeFileNo, output, sizeof(char)*index);
+    putBusy = TRUE;
+    kernel->interrupt->Schedule(this, ConsoleTime, ConsoleWriteInt);
+}
+

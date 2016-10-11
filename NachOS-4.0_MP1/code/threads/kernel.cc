@@ -17,7 +17,6 @@
 #include "synchdisk.h"
 #include "post.h"
 #include "synchconsole.h"
-#include <iostream>
 
 //----------------------------------------------------------------------
 // Kernel::Kernel
@@ -311,5 +310,5 @@ int Kernel::CreateFile(char *filename)
 
 void Kernel::PrintInt(int number)
 {
-	cout << "Kernel" << number << endl;
+	synchConsoleOut->PrintInt(number);
 }

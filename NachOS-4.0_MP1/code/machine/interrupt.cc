@@ -241,7 +241,6 @@ Interrupt::Halt()
 
 void
 Interrupt::PrintInt(int number){
-	cout << "interrupt" << number << endl;
 	kernel->PrintInt(number);
 }
 

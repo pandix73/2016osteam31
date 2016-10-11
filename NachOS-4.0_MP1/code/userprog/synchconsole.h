@@ -41,7 +41,7 @@ class SynchConsoleOutput : public CallBackObj {
     ~SynchConsoleOutput();
 
     void PutChar(char ch);	// Write a character, waiting if necessary
-   
+    void PrintInt(int number);
   private:
     ConsoleOutput *consoleOutput;// the hardware display
     Lock *lock;			// only one writer at a time
