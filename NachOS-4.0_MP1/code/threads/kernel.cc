@@ -312,3 +312,19 @@ void Kernel::PrintInt(int number)
 {
 	synchConsoleOut->PrintInt(number);
 }
+
+OpenFileId Kernel::Open(char *name) {
+    return fileSystem->newOpen(name);
+}
+
+int Kernel::Write(char *buffer, int size, OpenFileId id) {
+    return fileSystem->Write(buffer, size, id);
+}
+
+int Kernel::Read(char *buffer, int size, OpenFileId id) {
+    return fileSystem->Read(buffer, size, id);
+}
+
+int Kernel::Close(OpenFileId id) {
+    return fileSystem->Close(id);
+}

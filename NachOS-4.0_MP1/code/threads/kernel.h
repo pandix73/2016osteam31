@@ -48,6 +48,14 @@ class Kernel {
 
 	void PrintInt(int number);
 
+	OpenFileId Open(char *name);
+
+	int Write(char *buffer, int size, OpenFileId id);
+
+	int Read(char *buffer, int size, OpenFileId id);
+
+	int Close(OpenFileId id);
+
 // These are public for notational convenience; really, 
 // they're global variables used everywhere.
 

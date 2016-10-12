@@ -39,5 +39,20 @@ int SysCreate(char *filename)
 	return kernel->interrupt->CreateFile(filename);
 }
 
+OpenFileId SysOpen(char *name) {
+    return kernel->interrupt->Open(name);
+}
+
+int SysWrite(char *buffer, int size, OpenFileId id) {
+    return kernel->interrupt->Write(buffer, size, id);
+}
+
+int SysRead(char *buffer, int size, OpenFileId id) {
+    return kernel->interrupt->Read(buffer, size, id);
+}
+
+int SysClose(OpenFileId id) {
+    return kernel->interrupt->Close(id);
+}
 
 #endif /* ! __USERPROG_KSYSCALL_H__ */
