@@ -305,6 +305,7 @@ int Kernel::Exec(char* name)
 
 int Kernel::CreateFile(char *filename)
 {
+	cout << "kernel create" << endl;
 	return fileSystem->Create(filename);
 }
 
@@ -326,5 +327,5 @@ int Kernel::Read(char *buffer, int size, int id) {
 }
 
 int Kernel::Close(int id) {
-    return fileSystem->Close(id);
+	return fileSystem->newClose(id);
 }

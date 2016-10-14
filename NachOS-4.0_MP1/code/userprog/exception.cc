@@ -88,8 +88,8 @@ ExceptionHandler(ExceptionType which)
 			{
 			char *filename = &(kernel->machine->mainMemory[val]);
 			//cout << filename << endl;
-			status = SysCreate(filename);
-			kernel->machine->WriteRegister(2, (int) status);
+			int file = SysCreate(filename);
+			kernel->machine->WriteRegister(2, (int) file);
 			}
 			kernel->machine->WriteRegister(PrevPCReg, kernel->machine->ReadRegister(PCReg));
 			kernel->machine->WriteRegister(PCReg, kernel->machine->ReadRegister(PCReg) + 4);
@@ -102,8 +102,8 @@ ExceptionHandler(ExceptionType which)
 			{
 			char *filename = &(kernel->machine->mainMemory[val]);
 			//cout << filename << endl;
-			status = SysOpen(filename);
-			kernel->machine->WriteRegister(2, (int) status);
+			int openfile = SysOpen(filename);
+			kernel->machine->WriteRegister(2, (int) openfile);
 			}
 			kernel->machine->WriteRegister(PrevPCReg, kernel->machine->ReadRegister(PCReg));
 			kernel->machine->WriteRegister(PCReg, kernel->machine->ReadRegister(PCReg) + 4);
@@ -144,8 +144,8 @@ ExceptionHandler(ExceptionType which)
 		case SC_Close:
 			{
 			OpenFileId id = kernel->machine->ReadRegister(4);
-			status = SysClose(id);
-			kernel->machine->WriteRegister(2, (int) status);
+			int close = SysClose(id);
+			kernel->machine->WriteRegister(2, (int) close);
 			}
 			kernel->machine->WriteRegister(PrevPCReg, kernel->machine->ReadRegister(PCReg));
 			kernel->machine->WriteRegister(PCReg, kernel->machine->ReadRegister(PCReg) + 4);

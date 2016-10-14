@@ -51,7 +51,9 @@ class OpenFile {
 		currentOffset += numWritten;
 		return numWritten;
 		}
-
+	int fileClose() {
+		return Close(file);
+	}
     int Length() { Lseek(file, 0, 2); return Tell(file); }
     
   private:

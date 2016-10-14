@@ -73,10 +73,10 @@ class FileSystem {
 		return fileDescriptorTable[id]->Read(buffer, size);
 	}
 
-	int Close(int id){
-		int close = Close(id);
-		delete fileDescriptorTable[id];
-		return !close;
+	int newClose(int id){
+		int isclose = fileDescriptorTable[id]->fileClose();
+		fileDescriptorTable[id] = NULL;
+		return !isclose;
 	}
 
     bool Remove(char *name) { return Unlink(name) == 0; }
