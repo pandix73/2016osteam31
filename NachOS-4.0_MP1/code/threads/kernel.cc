@@ -313,18 +313,18 @@ void Kernel::PrintInt(int number)
 	synchConsoleOut->PrintInt(number);
 }
 
-OpenFileId Kernel::Open(char *name) {
+int Kernel::Open(char *name) {
     return fileSystem->newOpen(name);
 }
 
-int Kernel::Write(char *buffer, int size, OpenFileId id) {
+int Kernel::Write(char *buffer, int size, int id) {
     return fileSystem->Write(buffer, size, id);
 }
 
-int Kernel::Read(char *buffer, int size, OpenFileId id) {
+int Kernel::Read(char *buffer, int size, int id) {
     return fileSystem->Read(buffer, size, id);
 }
 
-int Kernel::Close(OpenFileId id) {
+int Kernel::Close(int id) {
     return fileSystem->Close(id);
 }

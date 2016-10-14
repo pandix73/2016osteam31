@@ -113,9 +113,9 @@ ExceptionHandler(ExceptionType which)
             break;
 		case SC_Write:
 			val = kernel->machine->ReadRegister(4);
+			{
 			int size = kernel->machine->ReadRegister(5);
 			OpenFileId id = kernel->machine->ReadRegister(6);
-			{
 			char *buffer = &(kernel->machine->mainMemory[val]);
 			int WriteNum = SysWrite(buffer, size, id);
 			kernel->machine->WriteRegister(2, (int) WriteNum);
@@ -128,9 +128,9 @@ ExceptionHandler(ExceptionType which)
             break;
 		case SC_Read:
 			val = kernel->machine->ReadRegister(4);
+			{
 			int size = kernel->machine->ReadRegister(5);
 			OpenFileId id = kernel->machine->ReadRegister(6);
-			{
 			char *buffer = &(kernel->machine->mainMemory[val]);
 			int ReadNum = SysRead(buffer, size, id);
 			kernel->machine->WriteRegister(2, (int) ReadNum);
@@ -142,8 +142,8 @@ ExceptionHandler(ExceptionType which)
 			ASSERTNOTREACHED();
             break;
 		case SC_Close:
-			OpenFileId id = kernel->machine->ReadRegister(4);
 			{
+			OpenFileId id = kernel->machine->ReadRegister(4);
 			status = SysClose(id);
 			kernel->machine->WriteRegister(2, (int) status);
 			}

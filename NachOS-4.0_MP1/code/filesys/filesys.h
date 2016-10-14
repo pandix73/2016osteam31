@@ -59,22 +59,24 @@ class FileSystem {
 	  return new OpenFile(fileDescriptor);
       }
 
-	OpenFileId newOpen(char *name){
+	int newOpen(char *name){
 		int fileDescriptor = OpenForReadWrite(name, FALSE);
 		fileDescriptorTable[fileDescriptor] = new OpenFile(fileDescriptor);
 		return fileDescriptor;
 	}
 
-	int Write(char *buffer, int size, OpenFileId id){
-		
+	int Write(char *buffer, int size, int id){
+		return fileDescriptorTable[id]->Write(buffer, size);
 	}
 
-	int Read(char *buffer, int size, OpenFileId id){
-	
+	int Read(char *buffer, int size, int id){
+		return fileDescriptorTable[id]->Read(buffer, size);
 	}
 
-	int Close(OpenFileId id){
-
+	int Close(int id){
+		int close = Close(id);
+		delete fileDescriptorTable[id];
+		return !close;
 	}
 
     bool Remove(char *name) { return Unlink(name) == 0; }
