@@ -354,6 +354,8 @@ depend: $(CFILES) $(HFILES)
 
 clean:
 	$(RM) -f $(OFILES)
+clena:
+	$(RM) -f $(OFILES)
 
 distclean: clean
 	$(RM) -f $(PROGRAM)
