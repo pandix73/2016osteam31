@@ -305,7 +305,6 @@ int Kernel::Exec(char* name)
 
 int Kernel::CreateFile(char *filename)
 {
-	cout << "kernel create" << endl;
 	return fileSystem->Create(filename);
 }
 

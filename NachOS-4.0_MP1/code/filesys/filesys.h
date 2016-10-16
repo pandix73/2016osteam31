@@ -61,22 +61,22 @@ class FileSystem {
 
 	int newOpen(char *name){
 		int fileDescriptor = OpenForReadWrite(name, FALSE);
+		if(fileDescriptor >= 20 || fileDescriptor < 0) return -1;
 		fileDescriptorTable[fileDescriptor] = new OpenFile(fileDescriptor);
 		return fileDescriptor;
 	}
 
 	int Write(char *buffer, int size, int id){
-		return fileDescriptorTable[id]->Write(buffer, size);
+		return (id < 20 && id >= 0) ? fileDescriptorTable[id]->Write(buffer, size) : -1;
 	}
 
 	int Read(char *buffer, int size, int id){
-		return fileDescriptorTable[id]->Read(buffer, size);
+		return (id < 20 && id >= 0) ? fileDescriptorTable[id]->Read(buffer, size) : -1;
 	}
 
 	int newClose(int id){
 		int isclose = fileDescriptorTable[id]->fileClose();
-		fileDescriptorTable[id] = NULL;
-		return !isclose;
+		return isclose+1;
 	}
 
     bool Remove(char *name) { return Unlink(name) == 0; }

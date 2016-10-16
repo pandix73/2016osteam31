@@ -15,6 +15,7 @@ int main(void)
 	}
 	success = Close(fid);
 	if (success != 1) MSG("Failed on closing file");
+	MSG("^_^");
 	Halt();
 }
 
