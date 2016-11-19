@@ -1,4 +1,5 @@
 let g:netrw_dirhistmax  =10
-let g:netrw_dirhist_cnt =2
+let g:netrw_dirhist_cnt =3
 let g:netrw_dirhist_1='/home/os2016/2016osteam31/NachOS-4.0_MP1/code/build.linux'
 let g:netrw_dirhist_2='/home/os2016/2016osteam31/NachOS-4.0_MP1/code'
+let g:netrw_dirhist_3='/home/os2016/2016osteam31/NachOS-4.0_MP2'
