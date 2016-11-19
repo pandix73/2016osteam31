@@ -8,6 +8,6 @@ main()
         
 		PrintInt(n);
         }
-        Halt();
+        Exit(0);
 }
 
