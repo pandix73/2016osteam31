@@ -107,18 +107,18 @@ void Scheduler::aging(List<Thread *> *list){
             printf("Tick %d: Thread %d changes its priority from %d to %d\n", kernel->stats->totalTicks, now->getID(), now->getPriority()-10, now->getPriority());
             list->Remove(now);
             if(now->getPriority() > 99){
-                if(list != L1){
+                if(list != L1){ // L2->L1
                     printf("Tick %d: Thread %d is removed from queue L2\n", kernel->stats->totalTicks, now->getID());
                     printf("Tick %d: Thread %d is inserted into queue L1\n", kernel->stats->totalTicks, now->getID());
                 }
                 L1->Insert(now);
             } else if(now->getPriority() > 49){
-                 if(list != L2){
+                 if(list != L2){ //L3->L2
                     printf("Tick %d: Thread %d is removed from queue L3\n", kernel->stats->totalTicks, now->getID());
                     printf("Tick %d: Thread %d is inserted into queue L2\n", kernel->stats->totalTicks, now->getID());
                 }
                 L2->Insert(now);
-            } else {
+            } else { //In L3
                 L3->Append(now);
             }
         }
@@ -139,21 +139,18 @@ Scheduler::FindNextToRun ()
     if (!L1->IsEmpty()) {
         kernel->alarm->setRoundRobin(false);
         thread = L1->RemoveFront();
-        printf("Tick %d: Thread %d is removed from queue L1\n", kernel->stats->totalTicks, thread->getID());
+        printf("Tick %d: Thread %d is removed from queue L1, pri = %d\n", kernel->stats->totalTicks, thread->getID(), thread->getPriority());
         thread->setPredict(thread->getPredict() / 2 + thread->getLastTime() / 2);
-        thread->setLastTime(0);
         return thread;
     } else if (!L2->IsEmpty()) {
         kernel->alarm->setRoundRobin(false);
         thread = L2->RemoveFront();
         printf("Tick %d: Thread %d is removed from queue L2\n", kernel->stats->totalTicks, thread->getID());
-        thread->setLastTime(0);
         return thread;
     } else if (!L3->IsEmpty()) {
         kernel->alarm->setRoundRobin(true);
         thread = L3->RemoveFront();
         printf("Tick %d: Thread %d is removed from queue L3\n", kernel->stats->totalTicks, thread->getID());
-        thread->setLastTime(0);
         return thread;
     } else return NULL;
 }
@@ -179,7 +176,6 @@ void
 Scheduler::Run (Thread *nextThread, bool finishing)
 {
     Thread *oldThread = kernel->currentThread;
-    
     ASSERT(kernel->interrupt->getLevel() == IntOff);
 
     if (finishing) {	// mark that we need to delete current thread
@@ -202,6 +198,7 @@ Scheduler::Run (Thread *nextThread, bool finishing)
 
     printf("Tick %d: Thread %d is now selected for execution\n", kernel->stats->totalTicks, nextThread->getID());
     printf("Tick %d: Thread %d is replaced, and it has executed %d ticks\n", kernel->stats->totalTicks, oldThread->getID(), oldThread->getLastTime());    
+    oldThread->setLastTime(0);
     // This is a machine-dependent assembly language routine defined 
     // in switch.s.  You may have to think
     // a bit to figure out what happens after this, both from the point

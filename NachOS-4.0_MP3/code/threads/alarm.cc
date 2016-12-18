@@ -50,6 +50,7 @@ Alarm::CallBack()
     MachineStatus status = interrupt->getStatus();
     
     if (status != IdleMode && roundRobin == true) {
+	printf("yield by roundrobin\n");
 	interrupt->YieldOnReturn();
     }
 }
