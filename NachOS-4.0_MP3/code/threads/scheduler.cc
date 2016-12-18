@@ -34,7 +34,7 @@ int cmpPriority(Thread* a, Thread* b){
 }
 
 int cmpPredict(Thread*a, Thread* b){
-    return a->getCurrTime() / 2 + a->getLastTime() / 2 > b->getCurrTime() / 2 + b->getLastTime() / 2;
+    return a->getPredict() / 2 + a->getLastTime() / 2 > b->getPredict() / 2 + b->getLastTime() / 2;
 }
 
 Scheduler::Scheduler()
@@ -72,6 +72,7 @@ Scheduler::ReadyToRun (Thread *thread)
     DEBUG(dbgThread, "Putting thread on ready list: " << thread->getName());
 	//cout << "Putting thread on ready list: " << thread->getName() << endl ;
     thread->setStatus(READY);
+    thread->setAgingCount(kernel->stats->totalTicks);
 
     if (thread->getPriority() < 50) {
         printf("Tick %d: Thread %d is inserted into queue L3\n", kernel->stats->totalTicks, thread->getID());
@@ -82,8 +83,9 @@ Scheduler::ReadyToRun (Thread *thread)
     } else if (thread->getPriority() < 150) {
         printf("Tick %d: Thread %d is inserted into queue L1\n", kernel->stats->totalTicks, thread->getID());
         L1->Insert(thread);
-    }
-    thread->setAgingCount(kernel->stats->totalTicks);
+ 		if(kernel->currentThread->getPriority() > 100 && cmpPredict(thread, kernel->currentThread))
+			kernel->interrupt->YieldOnReturn();
+   }
 }
 
 //----------------------------------------------------------------------
@@ -98,7 +100,7 @@ void Scheduler::aging(List<Thread *> *list){
     ListIterator<Thread*> *iter = new ListIterator<Thread*>((List<Thread*>*)list);
     for( ; iter->IsDone() != true; iter->Next()){
         Thread* now = iter->Item();
-        while(kernel->stats->totalTicks - now->getAgingCount() > 1500){
+        if(kernel->stats->totalTicks - now->getAgingCount() > 1500){
             now->setAgingCount(now->getAgingCount() + 1500);
             now->setPriority(now->getPriority() + 10);
             if(now->getPriority() > 149) now->setPriority(149);
@@ -138,16 +140,20 @@ Scheduler::FindNextToRun ()
         kernel->alarm->setRoundRobin(false);
         thread = L1->RemoveFront();
         printf("Tick %d: Thread %d is removed from queue L1\n", kernel->stats->totalTicks, thread->getID());
+        thread->setPredict(thread->getPredict() / 2 + thread->getLastTime() / 2);
+        thread->setLastTime(0);
         return thread;
     } else if (!L2->IsEmpty()) {
         kernel->alarm->setRoundRobin(false);
         thread = L2->RemoveFront();
         printf("Tick %d: Thread %d is removed from queue L2\n", kernel->stats->totalTicks, thread->getID());
+        thread->setLastTime(0);
         return thread;
     } else if (!L3->IsEmpty()) {
         kernel->alarm->setRoundRobin(true);
         thread = L3->RemoveFront();
         printf("Tick %d: Thread %d is removed from queue L3\n", kernel->stats->totalTicks, thread->getID());
+        thread->setLastTime(0);
         return thread;
     } else return NULL;
 }
@@ -193,7 +199,9 @@ Scheduler::Run (Thread *nextThread, bool finishing)
     nextThread->setStatus(RUNNING);      // nextThread is now running
     
     DEBUG(dbgThread, "Switching from: " << oldThread->getName() << " to: " << nextThread->getName());
-    
+
+    printf("Tick %d: Thread %d is now selected for execution\n", kernel->stats->totalTicks, nextThread->getID());
+    printf("Tick %d: Thread %d is replaced, and it has executed %d ticks\n", kernel->stats->totalTicks, oldThread->getID(), oldThread->getLastTime());    
     // This is a machine-dependent assembly language routine defined 
     // in switch.s.  You may have to think
     // a bit to figure out what happens after this, both from the point

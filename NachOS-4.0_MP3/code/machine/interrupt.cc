@@ -159,9 +159,7 @@ Interrupt::OneTick()
     } else {
 		stats->totalTicks += UserTick;
 		stats->userTicks += UserTick;
-		//modify for scheduling<<<<<<<<<<<<<<<<<<<<<
-		//kernel->currentThread->setTempTick(kernel->currentThread->checkTempTick()+UserTick)
-		//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+        kernel->currentThread->setLastTime(kernel->currentThread->getLastTime() + UserTick);
     }
     DEBUG(dbgInt, "== Tick " << stats->totalTicks << " ==");
 

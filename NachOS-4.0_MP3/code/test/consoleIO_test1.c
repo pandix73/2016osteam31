@@ -4,8 +4,9 @@ int
 main()
 {
 	int n;
-	for (n=9;n>5;n--) {
-		PrintInt(n);
+	int test = 0;
+	for (n=0;n<10000;n++) {
+		test++;
 	}
     Exit(0); 
 }

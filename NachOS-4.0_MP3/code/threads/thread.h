@@ -109,8 +109,8 @@ class Thread {
 
     void setPriority(int input) { priority = input; }
     int getPriority() { return (priority); }
-    void setCurrTime(int input) { currTime = input; }
-    int getCurrTime() { return (currTime); }
+    void setPredict(int input) { predict = input; }
+    int getPredict() { return (predict); }
     void setLastTime(int input) { lastTime = input; }
     int getLastTime() { return (lastTime); }
     void setAgingCount(int input) { agingCount = input; }
@@ -126,7 +126,7 @@ class Thread {
     char* name;
     int   ID;
     int   priority;
-    int   currTime;
+    int   predict;
     int   lastTime;
     int   agingCount;
 
