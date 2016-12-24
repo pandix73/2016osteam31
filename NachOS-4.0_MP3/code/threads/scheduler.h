@@ -32,7 +32,8 @@ class Scheduler {
     				// running needs to be deleted
     void Print();		// Print contents of ready list
     
-    void aging(List<Thread *>*list); 
+    void aging();
+    void agingCheck(List<Thread *>*list); 
     // SelfTest for scheduler is implemented in class Thread
     
   private:

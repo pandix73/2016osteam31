@@ -30,7 +30,7 @@
 //----------------------------------------------------------------------
 
 int cmpPriority(Thread* a, Thread* b){
-    return a->getPriority() > b->getPriority();
+    return (a->getPriority() < b->getPriority()) ? 1 : -1;
 }
 
 int cmpPredict(Thread*a, Thread* b){
@@ -70,7 +70,6 @@ Scheduler::ReadyToRun (Thread *thread)
 {
     ASSERT(kernel->interrupt->getLevel() == IntOff);
     DEBUG(dbgThread, "Putting thread on ready list: " << thread->getName());
-	//cout << "Putting thread on ready list: " << thread->getName() << endl ;
     thread->setStatus(READY);
     thread->setAgingCount(kernel->stats->totalTicks);
 
@@ -83,7 +82,7 @@ Scheduler::ReadyToRun (Thread *thread)
     } else if (thread->getPriority() < 150) {
         printf("Tick %d: Thread %d is inserted into queue L1\n", kernel->stats->totalTicks, thread->getID());
         L1->Insert(thread);
- 		if(kernel->currentThread->getPriority() > 100 && cmpPredict(thread, kernel->currentThread))
+ 		if(kernel->currentThread->getPriority() > 100 && cmpPredict(kernel->currentThread, thread))
 			kernel->interrupt->YieldOnReturn();
    }
 }
@@ -96,28 +95,38 @@ Scheduler::ReadyToRun (Thread *thread)
 //	Thread is removed from the ready list.
 //----------------------------------------------------------------------
 
-void Scheduler::aging(List<Thread *> *list){
+void Scheduler::aging(){
+	agingCheck(L1);
+	agingCheck(L2);
+	agingCheck(L3);
+}
+
+void Scheduler::agingCheck(List<Thread *> *list){
     ListIterator<Thread*> *iter = new ListIterator<Thread*>((List<Thread*>*)list);
     for( ; iter->IsDone() != true; iter->Next()){
         Thread* now = iter->Item();
-        if(kernel->stats->totalTicks - now->getAgingCount() > 1500){
+		int oriPriority = now->getPriority();
+        if(kernel->stats->totalTicks - now->getAgingCount() > 1500 && oriPriority != 149){
+			printf("aging occur !");
             now->setAgingCount(now->getAgingCount() + 1500);
-            now->setPriority(now->getPriority() + 10);
+            now->setPriority(now->getPriority() + 10);		
             if(now->getPriority() > 149) now->setPriority(149);
-            printf("Tick %d: Thread %d changes its priority from %d to %d\n", kernel->stats->totalTicks, now->getID(), now->getPriority()-10, now->getPriority());
+            printf("Tick %d: Thread %d changes its priority from %d to %d\n", kernel->stats->totalTicks, now->getID(), oriPriority, now->getPriority());
             list->Remove(now);
             if(now->getPriority() > 99){
+  			    L1->Insert(now);
                 if(list != L1){ // L2->L1
                     printf("Tick %d: Thread %d is removed from queue L2\n", kernel->stats->totalTicks, now->getID());
-                    printf("Tick %d: Thread %d is inserted into queue L1\n", kernel->stats->totalTicks, now->getID());
-                }
-                L1->Insert(now);
+			        printf("Tick %d: Thread %d is inserted into queue L1\n", kernel->stats->totalTicks, now->getID());				
+			 		if(kernel->currentThread->getPriority() < 100 || cmpPredict(kernel->currentThread, now))
+						kernel->interrupt->YieldOnReturn();
+				}
             } else if(now->getPriority() > 49){
-                 if(list != L2){ //L3->L2
-                    printf("Tick %d: Thread %d is removed from queue L3\n", kernel->stats->totalTicks, now->getID());
-                    printf("Tick %d: Thread %d is inserted into queue L2\n", kernel->stats->totalTicks, now->getID());
+                if(list != L2){ //L3->L2
+ 			        printf("Tick %d: Thread %d is inserted into queue L2\n", kernel->stats->totalTicks, now->getID());
+                   	printf("Tick %d: Thread %d is removed from queue L3\n", kernel->stats->totalTicks, now->getID());
                 }
-                L2->Insert(now);
+				L2->Insert(now);
             } else { //In L3
                 L3->Append(now);
             }
@@ -130,9 +139,9 @@ Scheduler::FindNextToRun ()
 {
     ASSERT(kernel->interrupt->getLevel() == IntOff);
     
-    aging(L1);
-    aging(L2);
-    aging(L3);
+    //aging(L1);
+    //aging(L2);
+    //aging(L3);
 
     Thread* thread;
 
