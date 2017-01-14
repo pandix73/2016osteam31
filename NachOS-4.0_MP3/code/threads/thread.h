@@ -111,6 +111,8 @@ class Thread {
     int getPriority() { return (priority); }
     void setPredict(int input) { predict = input; }
     int getPredict() { return (predict); }
+	void setExecTime(int input) { execTime = input; }
+	int getExecTime() { return (execTime); }
     void setLastTime(int input) { lastTime = input; }
     int getLastTime() { return (lastTime); }
     void setAgingCount(int input) { agingCount = input; }
@@ -127,6 +129,7 @@ class Thread {
     int   ID;
     int   priority;
     int   predict;
+	int   execTime;
     int   lastTime;
     int   agingCount;
 

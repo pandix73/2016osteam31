@@ -33,7 +33,8 @@ int cmpPriority(Thread* a, Thread* b){
     return (a->getPriority() < b->getPriority()) ? 1 : -1;
 }
 
-int cmpPredict(Thread*a, Thread* b){
+int cmpPredict(Thread* a, Thread* b){
+	//printf("cmp predict: %d vs %d\n", a->getPredict()/2 + a->getLastTime()/2, b->getPredict()/2 + b->getLastTime()/2);
     return a->getPredict() / 2 + a->getLastTime() / 2 > b->getPredict() / 2 + b->getLastTime() / 2;
 }
 
@@ -81,9 +82,13 @@ Scheduler::ReadyToRun (Thread *thread)
         L2->Insert(thread);
     } else if (thread->getPriority() < 150) {
         printf("Tick %d: Thread %d is inserted into queue L1\n", kernel->stats->totalTicks, thread->getID());
-        L1->Insert(thread);
- 		if(kernel->currentThread->getPriority() > 100 && cmpPredict(kernel->currentThread, thread))
+        printf("last: %d predict: %d\n", thread->getLastTime(), thread->getPredict());
+		L1->Insert(thread);
+		printf("current %d v.s. new %d\n", kernel->currentThread->getExecTime()/2 + kernel->currentThread->getPredict()/2, thread->getLastTime()/2 + thread->getPredict()/2);
+ 		if(kernel->currentThread->getPriority() < 100 || kernel->currentThread->getExecTime()/2 + kernel->currentThread->getPredict()/2 > thread->getLastTime()/2 + thread->getPredict()/2){
+			kernel->currentThread->setLastTime(kernel->currentThread->getExecTime());
 			kernel->interrupt->YieldOnReturn();
+		}
    }
 }
 
@@ -118,8 +123,12 @@ void Scheduler::agingCheck(List<Thread *> *list){
                 if(list != L1){ // L2->L1
                     printf("Tick %d: Thread %d is removed from queue L2\n", kernel->stats->totalTicks, now->getID());
 			        printf("Tick %d: Thread %d is inserted into queue L1\n", kernel->stats->totalTicks, now->getID());				
-			 		if(kernel->currentThread->getPriority() < 100 || cmpPredict(kernel->currentThread, now))
+			        printf("last: %d predict: %d\n", now->getLastTime(), now->getPredict());
+					printf("current %d v.s. new %d\n", kernel->currentThread->getExecTime()/2 + kernel->currentThread->getPredict()/2, now->getLastTime()/2 + now->getPredict()/2);
+			 		if(kernel->currentThread->getPriority() < 100 || kernel->currentThread->getExecTime()/2 + kernel->currentThread->getPredict()/2 > now->getLastTime()/2 + now->getPredict()/2){
+						kernel->currentThread->setLastTime(kernel->currentThread->getExecTime());
 						kernel->interrupt->YieldOnReturn();
+					}
 				}
             } else if(now->getPriority() > 49){
                 if(list != L2){ //L3->L2
@@ -206,8 +215,9 @@ Scheduler::Run (Thread *nextThread, bool finishing)
     DEBUG(dbgThread, "Switching from: " << oldThread->getName() << " to: " << nextThread->getName());
 
     printf("Tick %d: Thread %d is now selected for execution\n", kernel->stats->totalTicks, nextThread->getID());
-    printf("Tick %d: Thread %d is replaced, and it has executed %d ticks\n", kernel->stats->totalTicks, oldThread->getID(), oldThread->getLastTime());    
-    oldThread->setLastTime(0);
+    printf("Tick %d: Thread %d is replaced, and it has executed %d ticks\n", kernel->stats->totalTicks, oldThread->getID(), oldThread->getExecTime());    
+    oldThread->setLastTime(oldThread->getExecTime());
+	oldThread->setExecTime(0);
     // This is a machine-dependent assembly language routine defined 
     // in switch.s.  You may have to think
     // a bit to figure out what happens after this, both from the point

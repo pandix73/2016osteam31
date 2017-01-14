@@ -48,6 +48,7 @@ Thread::Thread(char* threadName, int threadID)
     space = NULL;
     priority = 0;
     predict = 0;
+	execTime = 0;
     lastTime = 0;
     agingCount = 0;
 }

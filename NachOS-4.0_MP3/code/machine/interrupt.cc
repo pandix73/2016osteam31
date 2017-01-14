@@ -159,7 +159,7 @@ Interrupt::OneTick()
     } else {
 		stats->totalTicks += UserTick;
 		stats->userTicks += UserTick;
-        kernel->currentThread->setLastTime(kernel->currentThread->getLastTime() + UserTick);
+        kernel->currentThread->setExecTime(kernel->currentThread->getExecTime() + UserTick);
     }
     DEBUG(dbgInt, "== Tick " << stats->totalTicks << " ==");
 
