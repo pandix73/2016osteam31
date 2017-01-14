@@ -155,7 +155,14 @@ Print(char *name)
 static void
 CreateDirectory(char *name)
 {
-	// MP4 Assignment
+	// MP4 Assignment Tiens
+	// If inside ASSERT is false , it will print a message to dump core.
+	ASSERT(name[0] == '/');
+	if(!kernel -> fileSystem -> Create(name, 0, true))
+	{
+		printf("Fail to Create directory %s\n", name);
+		return;
+	}	
 }
 
 //----------------------------------------------------------------------
@@ -318,7 +325,11 @@ main(int argc, char **argv)
 		kernel->fileSystem->Print();
     }
     if (dirListFlag) {
-		kernel->fileSystem->List();
+		if(recursiveListFlag){
+			kernel->fileSystem->RecursiveList(listDirectoryName);
+		}else{
+			kernel->fileSystem->List(listDirectoryName, false);
+		}
     }
 	if (mkdirFlag) {
 		// MP4 mod tag
