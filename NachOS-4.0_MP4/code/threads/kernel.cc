@@ -336,3 +336,27 @@ int Kernel::CreateFile(char *filename)
 }
 #endif
 
+//New file system Control
+//--------------------------------------------------
+int Kernel::CreateFile(char *filename, int size)
+{
+	return fileSystem->Create(filename, size);
+}
+
+OpenFileId Kernel::OpenFile(char *filename)
+{
+	return fileSystem->OpenFileForId(filename);
+}
+int Kernel::WriteToFileId(char *buffer, int size, OpenFileId ID)
+{
+	return fileSystem->WriteToFileId(buffer, size, ID);
+}
+int Kernel::ReadFromFileId(char *buffer, int size, OpemFileId ID)
+{
+	return fileSystem->ReadFromFileId(buffer, size, ID);
+}
+int Kernel::CloseFileId(OpenFileId ID)
+{
+	return fileSystem->CloseFileId(ID);
+}
+//---------------------------------------------------
