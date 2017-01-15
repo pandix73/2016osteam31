@@ -37,10 +37,7 @@
 #include "list.h"
 #include "callback.h"
 
-
-//Add new type for file system
-//Tiens
-typedef int OpenFileID; 
+ 
 
 // Interrupts can be disabled (IntOff) or enabled (IntOn)
 enum IntStatus { IntOff, IntOn };
@@ -118,10 +115,10 @@ class Interrupt {
 	//Tiens modify
 	//Add new interrupt for file system
     int CreatFile(char *filename, int size);
-	OpenFileID OpenFile(char *filename);
-	int WriteToFileId(char *buffer, int size, OpenFileID ID);
-	int ReadToFileId(char *buffer, int size, OpenFileID ID);
-	int CloseFileId(OpenFileID ID);
+	int OpenFile(char *filename);
+	int WriteToFileId(char *buffer, int size, int ID);
+	int ReadToFileId(char *buffer, int size, int ID);
+	int CloseFileId(int ID);
 	//
     // NOTE: the following are internal to the hardware simulation code.
     // DO NOT call these directly.  I should make them "private",
