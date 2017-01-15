@@ -247,43 +247,53 @@ Interrupt::Halt()
     delete kernel;	// Never returns.
 }
 
- //#ifdef FILESYS_STUB
+#ifdef FILESYS_STUB
  //Tiens modify basic Interrupt for File System
  //Create a file
  //
  //return : createfile status
 
+
+
 int
-Interrupt::CreateFile(char *filename, int size) //Add size
+Interrupt::CreateFile(char *filename) //Add size
 {
-    return kernel->CreateFile(filename, size);
+    return kernel->CreateFile(filename);
 }
 #endif
+int
+Interrupt::CreateFile(char *filename, int size)
+{
+	return kernel->CreateFile(filename, size);
+}
+
  //OpenFile 
  //file id 
- 
-OpenFileId
-Interrupt::OpenFile(char *file)
+
+
+
+int
+Interrupt::OpenFile(char *filename)
 {
-	return kernel->OpenFile(file);
+	return kernel->OpenFile(filename);
 }
  //WriteToFileId
  //Write String to the file specify by file ID
 
 int
-Interrupt::WriteToFileId(char *buffer, int size, OpenFileId ID)
+Interrupt::WriteToFileId(char *buffer, int size, int ID)
 {
-	return kernel->WriteToFileId(buffer, size, id);
+	return kernel->WriteToFileId(buffer, size, ID);
 }
 
 int
-Interrupt::ReadFromFileId(char buffer, int size, OpenFileId ID)
+Interrupt::ReadFromFileId(char buffer, int size, int ID)
 {
 	return kernel->ReadFromFileId(buffer, size, ID);
 }
 
 int
-Interrupt::CloseFileId(OpenFileId ID)
+Interrupt::CloseFileId(int ID)
 {
 	return kernel->CloseFileId(ID);
 }
