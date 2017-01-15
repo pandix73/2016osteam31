@@ -74,13 +74,16 @@ ExceptionHandler(ExceptionType which)
 			SysHalt();
 			ASSERTNOTREACHED();
 			break;
-		#ifdef FILESYS_STUB
-		case SC_Create:
+		//#ifdef FILESYS_STUB
+		//Add size integer for File System
+		case SC_Create: 
 			val = kernel->machine->ReadRegister(4);
 			{
 			char *filename = &(kernel->machine->mainMemory[val]);
+			int size = kernel->machine->ReadRegister(5);
+			cout<<"--Create----Size in exception is = "<<size<<endl;
 			//cout << filename << endl;
-			status = SysCreate(filename);
+			status = SysCreate(filename, size);
 			kernel->machine->WriteRegister(2, (int) status);
 			}
 			kernel->machine->WriteRegister(PrevPCReg, kernel->machine->ReadRegister(PCReg));
@@ -89,7 +92,66 @@ ExceptionHandler(ExceptionType which)
 			return;
 			ASSERTNOTREACHED();
             break;
-		#endif
+		case SC_Open:
+			val = kernel->machine->ReadRegister(4);
+			{
+			char *filename = &(kernel->machine->mainMemory[val]); 
+			OpenFileId FileId = SysOpen(filename);
+			cout<<"--OPEN in exec FileID = "<<FileId<<endl;
+			kernel->machine->WriteRegister(2, (OpenFile), FileId);
+			}
+			kernel->machine->WriteRegister(PrevPCReg, kernel->machine->ReadRegister(PCReg));
+			kernel->machine->WriteRegister(PCReg, kernel->machine->ReadRegister(PCReg)+4);
+			kernel->machine->WriteRegister(NextPCReg, kernel->machine->ReadRegister(PCReg)+4);
+			return;
+			ASSERTNOTREACHED();
+			break;
+		case SC_Write:
+			val = kernel->machine->ReadRegister(4);
+			{
+			char *buffer = &(kernel->machine->mainMemory[val]);
+			int size = kernel->machine->ReadRegister(5);
+			cout<<"--Write in EXEC size  = "<< size << endl;
+			OpenFileId FileId = kernel->machine->ReadRegister(6);
+			status = SysWrite(buffer, size, FileId);
+			kernel->machine->WriteRegister(2, (int) status);
+			}
+			kernel->machine->WriteRegister(PrevPCReg, kernel->machine->ReadRegister(PCReg));
+			kernel->machine->WriteRegister(PCReg, kernel->machine->ReadRegister(PCReg)+4);
+			kernel->machine->WriteRegister(NextPCReg, kernel->macine->ReadRegister(PCReg)+4);
+			return;
+			ASSERTNOTREACHED();
+			break;
+		case SC_Read:
+			val = kernel->machine->ReadRegister(4);
+			{
+			int size = kernel->machine->ReadRegister(5);
+			cout << "--Read in exec size = "<<size<<endl; 
+			char *buffer = &(kernel->machine->mainMemory[val]);
+			OpenFileId FileId = kernel->machine->ReadRegister(6);
+			status = SysRead(buffer, size, FileId);
+			kernel->machine->WriteRegister(2, (int), status);	
+			}
+			kernel->machine->WriteRegister(PrevPCReg, kernel->machine->ReadRegister(PCReg));
+			kernel->machine->WriteRegister(PCReg, kernel->machine->ReadRegister(PCReg)+4);
+			kernel->machine->WriteRegister(NextPCReg, kernel->machine->ReadRegister(PCReg)+4);
+			return;
+			ASSERTNOTREACHED();
+			break;
+		case SC_Close:
+			{
+			OpenFileId FileId = kernel->machine->ReadRegister(4);
+			status = SysClose(FileId);
+			cout << "CLOSE in EXEC" << endl;
+			kernel->machine->WriteRegister(2, (int), status);
+			}
+			kernel->machine->WriteRegister(PrevPCReg, kernel->machine->ReadRegister(PCReg));
+			kernel->machine->WriteRegister(PCReg, kernel->machine->ReadRegister(PCReg)+4);
+			kernel->machine->writeRegister(NextPCReg, kernel->machine->ReadRegister(PCReg)+4);
+			return;
+			ASSERTNOTREACHED();
+			break;
+		//#endif
       	case SC_Add:
 			DEBUG(dbgSys, "Add " << kernel->machine->ReadRegister(4) << " + " << kernel->machine->ReadRegister(5) << "\n");
 			/* Process SysAdd Systemcall*/
