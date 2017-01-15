@@ -52,10 +52,10 @@ class Kernel {
 	int CreateFile(char* filename); // fileSystem call
 	#endif
 	int CreateFile(char* filename, int size);
-	OpenFileID OpenFile(char *filename);
-	int WriteToFileId(char *buffer, int size, OpenFileId ID);
-	int ReadFromFileId(char *buffer, int size, OpenFileId ID);
-	int CloseFileId(OpenFileId ID);
+	int OpenFile(char *filename);
+	int WriteToFileId(char *buffer, int size, int ID);
+	int ReadFromFileId(char *buffer, int size, int ID);
+	int CloseFileId(int ID);
 
 // These are public for notational convenience; really, 
 // they're global variables used everywhere.
@@ -72,7 +72,9 @@ class Kernel {
     FileSystem *fileSystem;     
     PostOfficeInput *postOfficeIn;
     PostOfficeOutput *postOfficeOut;
-
+	
+	OpenFile *OPENFILE;
+	
     int hostName;               // machine identifier
 
   private:
