@@ -96,9 +96,9 @@ ExceptionHandler(ExceptionType which)
 			val = kernel->machine->ReadRegister(4);
 			{
 			char *filename = &(kernel->machine->mainMemory[val]); 
-			OpenFileId FileId = SysOpen(filename);
+			int FileId = SysOpen(filename);
 			cout<<"--OPEN in exec FileID = "<<FileId<<endl;
-			kernel->machine->WriteRegister(2, (OpenFile), FileId);
+			kernel->machine->WriteRegister(2, (int), FileId);
 			}
 			kernel->machine->WriteRegister(PrevPCReg, kernel->machine->ReadRegister(PCReg));
 			kernel->machine->WriteRegister(PCReg, kernel->machine->ReadRegister(PCReg)+4);
@@ -112,7 +112,7 @@ ExceptionHandler(ExceptionType which)
 			char *buffer = &(kernel->machine->mainMemory[val]);
 			int size = kernel->machine->ReadRegister(5);
 			cout<<"--Write in EXEC size  = "<< size << endl;
-			OpenFileId FileId = kernel->machine->ReadRegister(6);
+			int FileId = kernel->machine->ReadRegister(6);
 			status = SysWrite(buffer, size, FileId);
 			kernel->machine->WriteRegister(2, (int) status);
 			}
@@ -128,9 +128,9 @@ ExceptionHandler(ExceptionType which)
 			int size = kernel->machine->ReadRegister(5);
 			cout << "--Read in exec size = "<<size<<endl; 
 			char *buffer = &(kernel->machine->mainMemory[val]);
-			OpenFileId FileId = kernel->machine->ReadRegister(6);
+			int FileId = kernel->machine->ReadRegister(6);
 			status = SysRead(buffer, size, FileId);
-			kernel->machine->WriteRegister(2, (int), status);	
+			kernel->machine->WriteRegister(2,  status);	
 			}
 			kernel->machine->WriteRegister(PrevPCReg, kernel->machine->ReadRegister(PCReg));
 			kernel->machine->WriteRegister(PCReg, kernel->machine->ReadRegister(PCReg)+4);
@@ -140,10 +140,10 @@ ExceptionHandler(ExceptionType which)
 			break;
 		case SC_Close:
 			{
-			OpenFileId FileId = kernel->machine->ReadRegister(4);
+			int FileId = kernel->machine->ReadRegister(4);
 			status = SysClose(FileId);
 			cout << "CLOSE in EXEC" << endl;
-			kernel->machine->WriteRegister(2, (int), status);
+			kernel->machine->WriteRegister(2,  status);
 			}
 			kernel->machine->WriteRegister(PrevPCReg, kernel->machine->ReadRegister(PCReg));
 			kernel->machine->WriteRegister(PCReg, kernel->machine->ReadRegister(PCReg)+4);
