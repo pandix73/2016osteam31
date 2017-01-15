@@ -52,7 +52,7 @@ class Kernel {
 	int CreateFile(char* filename); // fileSystem call
 	#endif
 	int CreateFile(char* filename, int size);
-	int OpenFile(char *filename);
+	int Open(char *filename);
 	int WriteToFileId(char *buffer, int size, int ID);
 	int ReadFromFileId(char *buffer, int size, int ID);
 	int CloseFileId(int ID);
@@ -72,9 +72,7 @@ class Kernel {
     FileSystem *fileSystem;     
     PostOfficeInput *postOfficeIn;
     PostOfficeOutput *postOfficeOut;
-	
-	OpenFile *OPENFILE;
-	
+	OpenFile *OPF;	
     int hostName;               // machine identifier
 
   private:

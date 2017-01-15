@@ -76,8 +76,8 @@ class FileSystem {
     					// and the bitmap of free blocks.
 	// MP4 mod tag
 	~FileSystem();
-
-    bool Create(char *name, int initialSize);  	
+	void SplitPath(char *FullPath, char *Path, char *filename);
+    bool Create(char *name, int initialSize, bool Directory);  	
 					// Create a file (UNIX creat)
 
     OpenFile* Open(char *name); 	// Open a file (UNIX open)
@@ -85,7 +85,7 @@ class FileSystem {
     bool Remove(char *name);  		// Delete a file (UNIX unlink)
 
     void List();			// List all the files in the file system
-
+	void RecursiveList();  	// List all the files in the file system in RecursiveList
     void Print();			// List all the files and their contents
 
   private:

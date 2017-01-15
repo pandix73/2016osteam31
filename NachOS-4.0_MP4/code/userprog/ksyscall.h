@@ -39,21 +39,21 @@ int SysCreate(char *filename, int size)
 {
 	return kernel->interrupt->CreateFile(filename, size);
 }
-OpenFileId SysOpen(char *filename)
+int SysOpen(char *filename)
 {
 	return kernel->interrupt->OpenFile(filename);
 }
-int SysWrite(char *buffer, int size, OpenFileId ID)
+int SysWrite(char *buffer, int size, int ID)
 {
-	return kernel->interrupt->WriteFileWithId(buffer, size, ID);
+	return kernel->interrupt->WriteToFileId(buffer, size, ID);
 }
-int SysClose(FileId ID)
+int SysClose(int ID)
 {
-	return kernel->interrupt->CloseFileWithId(ID);
+	return kernel->interrupt->CloseFileId(ID);
 }
-int SysRead(char *buffer, int size, OpenFileId ID)
+int SysRead(char *buffer, int size, int ID)
 {
-	return kernel->interrupt->ReadFromFileWithId(buffer, size, ID);
+	return kernel->interrupt->ReadFromFileId(buffer, size, ID);
 }
 
 #endif /* ! __USERPROG_KSYSCALL_H__ */

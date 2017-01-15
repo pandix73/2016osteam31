@@ -114,10 +114,10 @@ class Interrupt {
 	//File System<-----
 	//Tiens modify
 	//Add new interrupt for file system
-    int CreatFile(char *filename, int size);
-	int OpenFile(char *filename);
+    int CreateFile(char *filename, int size);
+	int Open(char *filename);
 	int WriteToFileId(char *buffer, int size, int ID);
-	int ReadToFileId(char *buffer, int size, int ID);
+	int ReadFromFileId(char *buffer, int size, int ID);
 	int CloseFileId(int ID);
 	//
     // NOTE: the following are internal to the hardware simulation code.

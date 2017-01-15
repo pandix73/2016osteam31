@@ -62,7 +62,7 @@
 // supports extensible files, the directory size sets the maximum number 
 // of files that can be loaded onto the disk.
 #define FreeMapFileSize 	(NumSectors / BitsInByte)
-#define NumDirEntries 		10
+#define NumDirEntries 		64
 #define DirectoryFileSize 	(sizeof(DirectoryEntry) * NumDirEntries)
 
 //----------------------------------------------------------------------
@@ -180,21 +180,61 @@ FileSystem::~FileSystem()
 //	"name" -- name of file to be created
 //	"initialSize" -- size of file to be created
 //----------------------------------------------------------------------
+void
+FileSystem::SplitPath(char *FullPath, char *Path, char *filename)
+{
+	int i, j;
+	int split;
+	for(i = 0; FullPath[i] != '\0'; i++)
+	{
+		if(FullPath[i] == '/')
+		{
+			split = i;
+		}
+	}
+	Path[0] = '/';
+	for(i = 1; i < split; i++)
+	{
+		Path[i] = FullPath[i];
+	}
+	Path[i] = '\0';
+	for(i = split, j = 0; FullPath[i] != '\0'; i++, j++)
+	{
+		filename[j] = FullPath[i];
+	}
+	filename[j] = '\0';
+
+}
 
 bool
-FileSystem::Create(char *name, int initialSize)
+FileSystem::Create(char *name, int initialSize, bool Directory)
 {
-    Directory *directory;
+   	int DirecSector;
+	Directory *RootDirectory;
+	OpenFile *file;
+	Directory *directory;
     PersistentBitmap *freeMap;
     FileHeader *hdr;
+	
     int sector;
     bool success;
-
+	int size = initialSize;
+	if(Directory) size = DirectoryFileSize;
+	char Path[256]; //255+1
+	char filename[10];	 //9+1
     DEBUG(dbgFile, "Creating file " << name << " size " << initialSize);
 
-    directory = new Directory(NumDirEntries);
-    directory->FetchFrom(directoryFile);
+    Rootdirectory = new Directory(NumDirEntries);
+    Rootdirectory->FetchFrom(directoryFile);
+	
+	SplitPath(name, Path, filename);
+	DirecSector = Rootdirectory->FindPath(Path);
+	if(DirecSector == -1) return FALSE;
 
+	file = new OpenFile(DirecSector);
+	directory = new Directory(NumDirEntries);
+	directory->FetchFrom(file);
+		
     if (directory->Find(name) != -1)
       success = FALSE;			// file is already in directory
     else {	
@@ -202,7 +242,7 @@ FileSystem::Create(char *name, int initialSize)
         sector = freeMap->FindAndSet();	// find a sector to hold the file header
     	if (sector == -1) 		
             success = FALSE;		// no free block for file header 
-        else if (!directory->Add(name, sector))
+        else if (!directory->Add(filename, sector, Directory))
             success = FALSE;	// no space in directory
 	else {
     	    hdr = new FileHeader;
@@ -211,15 +251,26 @@ FileSystem::Create(char *name, int initialSize)
 	    else {	
 	    	success = TRUE;
 		// everthing worked, flush all changes back to disk
-    	    	hdr->WriteBack(sector); 		
-    	    	directory->WriteBack(directoryFile);
+    	    	hdr->WriteBack(sector);
+				cout<<name<<"--at--"<<sector<<" (1 = Directory, 0 = File)==>"<< Directory <<endl;		
+    	    	directory->WriteBack(file);
     	    	freeMap->WriteBack(freeMapFile);
+			if(Directory)
+			{
+				delete file;
+				delete directory;
+				file = new OpenFile(sector);
+				directory = new Directory(NumDirEntries);
+				directory->WriteBack(file);
+			}
 	    }
             delete hdr;
 	}
         delete freeMap;
     }
-    delete directory;
+	delete file;
+    delete Rootdirectory;
+	delete directory;
     return success;
 }
 
@@ -271,9 +322,14 @@ FileSystem::Remove(char *name)
     FileHeader *fileHdr;
     int sector;
     
+	OpenFile *file;
+	char Path[256];
+	char filename[10];
+	SpiltPath(name, Path, filename);
+
     directory = new Directory(NumDirEntries);
     directory->FetchFrom(directoryFile);
-    sector = directory->Find(name);
+    sector = directory->FindPath(name);
     if (sector == -1) {
        delete directory;
        return FALSE;			 // file not found 
@@ -285,10 +341,28 @@ FileSystem::Remove(char *name)
 
     fileHdr->Deallocate(freeMap);  		// remove data blocks
     freeMap->Clear(sector);			// remove header block
-    directory->Remove(name);
+   // directory->Remove(name);
+   //
+   	sector = directory->FindPath(Path);
+	if(sector == -1){
+		delete directory;
+		return FALSE;
+	}
+	
+	file = new OpenFile(sector);
+	directory->FetchFrom(file);
+	directory->Remove(filename);
+	FileHeader *iterHdr = fileHdr;
+	int iterSector = sector;
+	for(iterHdr = fileHdr; iterHdr == NULL; iterHdr = iterHdr->getNextFHdr){
+		freemap->Clear(iterSector);
+		iterSector = iterHdr->getNextSector();
+	}
 
     freeMap->WriteBack(freeMapFile);		// flush to disk
-    directory->WriteBack(directoryFile);        // flush to disk
+    directory->WriteBack(file);        // flush to disk
+
+	delete file;
     delete fileHdr;
     delete directory;
     delete freeMap;
@@ -300,14 +374,62 @@ FileSystem::Remove(char *name)
 // 	List all the files in the file system directory.
 //----------------------------------------------------------------------
 
-void
-FileSystem::List()
-{
-    Directory *directory = new Directory(NumDirEntries);
 
-    directory->FetchFrom(directoryFile);
+void
+FileSystem::List(char *name)
+{
+	Directory *directory = new Directory(NumDirEntries);
+	OpenFile *file = NULL;
+
+
+	directory->FerchFrom(directoryFile);
+	int sector = directory->FindPath(name);
+	if(sector >= 0) file = new OpenFile(sector);	
+
+	directory->FetchFrom(file);
     directory->List();
+
+	delete file;
     delete directory;
+}
+
+void
+FileSystem::RecrusiveList(char *name)
+{
+	Directory *Rootdirectory = new Directory(NumDirEntries);
+	Directory *Leafdirectory = new Directory(NumDirEntries);
+	OpenFile *file = NULL;
+	int sector;
+	char CombinePath[256];
+
+	if(strlen(name) == 1) name = '\0';
+
+	strcpy(CombinePath, name);
+	Rootdirectory->FetchFrom(directoryFile);
+	sector = Rootdirectory->FindPath(name);
+
+	if(sector >= 0) file = new OpenFile(sector);
+
+	Rootdirectory->FetchFrom(file);
+	DirectoryEntry *RootEntry = Rootdirectory->getTable();
+	for(int i = 0; i < NumDirEntries; i++){
+		if(RootEntry[i].inUse){
+			strcat(CombinePath, RootEntry[i].name);			
+		
+		if(RootEntry[i].Directory) printf("--%s--Directory\n", CombinePath);
+		else printf("--%s--File\n", CombinePath);
+		if(RootEntry[i].Directory){
+			OpenFile *file_recur = new OpenFile(RootEntry[i].sector);
+			Leafdirectory->FetchFrom(file_recur);
+			delete file_recur;
+			RecursiveList(CombinePath); 
+		}
+		strcpy(CombinePath, name);
+		}
+	}
+	if(file != NULL) delete file;
+	delete Rootdirectory;
+	delete Leafdirectory;
 }
 
 //----------------------------------------------------------------------

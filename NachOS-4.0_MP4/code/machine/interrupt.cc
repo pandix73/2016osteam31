@@ -273,9 +273,9 @@ Interrupt::CreateFile(char *filename, int size)
 
 
 int
-Interrupt::OpenFile(char *filename)
+Interrupt::Open(char *filename)
 {
-	return kernel->OpenFile(filename);
+	return kernel->Open(filename);
 }
  //WriteToFileId
  //Write String to the file specify by file ID
@@ -287,7 +287,7 @@ Interrupt::WriteToFileId(char *buffer, int size, int ID)
 }
 
 int
-Interrupt::ReadFromFileId(char buffer, int size, int ID)
+Interrupt::ReadFromFileId(char *buffer, int size, int ID)
 {
 	return kernel->ReadFromFileId(buffer, size, ID);
 }

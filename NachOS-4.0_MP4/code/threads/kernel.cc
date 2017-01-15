@@ -340,23 +340,31 @@ int Kernel::CreateFile(char *filename)
 //--------------------------------------------------
 int Kernel::CreateFile(char *filename, int size)
 {
-	return fileSystem->Create(filename, size);
+	return fileSystem->Create(filename, size, false);
 }
 
-OpenFileId Kernel::OpenFile(char *filename)
+int Kernel::Open(char *filename)
 {
-	return fileSystem->OpenFileForId(filename);
+	OPF = fileSystem->Open(filename);
+	if(OPF != NULL) return (int)&OPF;
+	else return -1;
 }
-int Kernel::WriteToFileId(char *buffer, int size, OpenFileId ID)
+int Kernel::WriteToFileId(char *buffer, int size, int ID)
 {
-	return fileSystem->WriteToFileId(buffer, size, ID);
+	if(ID == (int)&OPF) return OPF->Write(buffer, size);
+	else return -1;
 }
-int Kernel::ReadFromFileId(char *buffer, int size, OpemFileId ID)
+int Kernel::ReadFromFileId(char *buffer, int size, int ID)
 {
-	return fileSystem->ReadFromFileId(buffer, size, ID);
+	if(ID == (int)&OPF) return OPF->Read(buffer, size);
+	else return -1;
 }
-int Kernel::CloseFileId(OpenFileId ID)
+int Kernel::CloseFileId(int ID)
 {
-	return fileSystem->CloseFileId(ID);
+	if(ID == (int)&OPF)
+	{
+		delete OPF;
+		return 1;		
+	}else return 0;
 }
 //---------------------------------------------------
