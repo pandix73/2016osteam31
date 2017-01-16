@@ -93,13 +93,13 @@ FileSystem::FileSystem(bool format)
 		// (make sure no one else grabs these!)
 		freeMap->Mark(FreeMapSector);	    
 		freeMap->Mark(DirectorySector);
-
+		cout<<"mark finish"<<endl;
 		// Second, allocate space for the data blocks containing the contents
 		// of the directory and bitmap files.  There better be enough space!
 
 		ASSERT(mapHdr->Allocate(freeMap, FreeMapFileSize));
 		ASSERT(dirHdr->Allocate(freeMap, DirectoryFileSize));
-
+		cout<<"test allocate finish"<<endl;
 		// Flush the bitmap and directory FileHeaders back to disk
 		// We need to do this before we can "Open" the file, since open
 		// reads the file header off of disk (and currently the disk has garbage
@@ -108,14 +108,14 @@ FileSystem::FileSystem(bool format)
         DEBUG(dbgFile, "Writing headers back to disk.");
 		mapHdr->WriteBack(FreeMapSector);    
 		dirHdr->WriteBack(DirectorySector);
-
+		cout<<"writeback finish"<<endl;
 		// OK to open the bitmap and directory files now
 		// The file system operations assume these two files are left open
 		// while Nachos is running.
 
         freeMapFile = new OpenFile(FreeMapSector);
         directoryFile = new OpenFile(DirectorySector);
-     
+     	cout<<"new file finish"<<endl;
 		// Once we have the files "open", we can write the initial version
 		// of each file back to disk.  The directory at this point is completely
 		// empty; but the bitmap has been changed to reflect the fact that
@@ -125,7 +125,7 @@ FileSystem::FileSystem(bool format)
         DEBUG(dbgFile, "Writing bitmap and directory back to disk.");
 		freeMap->WriteBack(freeMapFile);	 // flush changes to disk
 		directory->WriteBack(directoryFile);
-
+		cout<<"write back finish"<<endl;
 		if (debug->IsEnabled('f')) {
 			freeMap->Print();
 			directory->Print();

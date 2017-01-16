@@ -56,7 +56,6 @@ Disk::Disk(CallBackObj *toCall)
         fileno = OpenForWrite(diskname);
 	magicNum = MagicNumber;  
 	WriteFile(fileno, (char *) &magicNum, MagicSize); // write magic number
-
 	// need to write at end of file, so that reads will not return EOF
         Lseek(fileno, DiskSize - sizeof(int), 0);	
 	WriteFile(fileno, (char *)&tmp, sizeof(int));  
