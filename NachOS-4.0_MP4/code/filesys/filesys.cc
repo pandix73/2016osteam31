@@ -207,7 +207,7 @@ FileSystem::SplitPath(char *FullPath, char *Path, char *filename)
 }
 
 bool
-FileSystem::Create(char *name, int initialSize, bool Directory)
+FileSystem::Create(char *name, int initialSize, bool isDirectory)
 {
    	int DirecSector;
 	Directory *RootDirectory;
@@ -219,16 +219,16 @@ FileSystem::Create(char *name, int initialSize, bool Directory)
     int sector;
     bool success;
 	int size = initialSize;
-	if(Directory) size = DirectoryFileSize;
+	if(isDirectory) size = DirectoryFileSize;
 	char Path[256]; //255+1
 	char filename[10];	 //9+1
     DEBUG(dbgFile, "Creating file " << name << " size " << initialSize);
 
-    Rootdirectory = new Directory(NumDirEntries);
-    Rootdirectory->FetchFrom(directoryFile);
+    RootDirectory = new Directory(NumDirEntries);
+    RootDirectory->FetchFrom(directoryFile);
 	
 	SplitPath(name, Path, filename);
-	DirecSector = Rootdirectory->FindPath(Path);
+	DirecSector = RootDirectory->FindPath(Path);
 	if(DirecSector == -1) return FALSE;
 
 	file = new OpenFile(DirecSector);
@@ -242,7 +242,7 @@ FileSystem::Create(char *name, int initialSize, bool Directory)
         sector = freeMap->FindAndSet();	// find a sector to hold the file header
     	if (sector == -1) 		
             success = FALSE;		// no free block for file header 
-        else if (!directory->Add(filename, sector, Directory))
+        else if (!directory->Add(filename, sector, isDirectory))
             success = FALSE;	// no space in directory
 	else {
     	    hdr = new FileHeader;
@@ -252,10 +252,10 @@ FileSystem::Create(char *name, int initialSize, bool Directory)
 	    	success = TRUE;
 		// everthing worked, flush all changes back to disk
     	    	hdr->WriteBack(sector);
-				cout<<name<<"--at--"<<sector<<" (1 = Directory, 0 = File)==>"<< Directory <<endl;		
+				cout<<name<<"--at--"<<sector<<" (1 = Directory, 0 = File)==>"<< isDirectory <<endl;		
     	    	directory->WriteBack(file);
     	    	freeMap->WriteBack(freeMapFile);
-			if(Directory)
+			if(isDirectory)
 			{
 				delete file;
 				delete directory;
@@ -266,10 +266,10 @@ FileSystem::Create(char *name, int initialSize, bool Directory)
 	    }
             delete hdr;
 	}
-        delete freeMap;
+       delete freeMap;
     }
 	delete file;
-    delete Rootdirectory;
+    delete RootDirectory;
 	delete directory;
     return success;
 }
@@ -325,7 +325,7 @@ FileSystem::Remove(char *name)
 	OpenFile *file;
 	char Path[256];
 	char filename[10];
-	SpiltPath(name, Path, filename);
+	SplitPath(name, Path, filename);
 
     directory = new Directory(NumDirEntries);
     directory->FetchFrom(directoryFile);
@@ -382,7 +382,7 @@ FileSystem::List(char *name)
 	OpenFile *file = NULL;
 
 
-	directory->FerchFrom(directoryFile);
+	directory->FetchFrom(directoryFile);
 	int sector = directory->FindPath(name);
 	if(sector >= 0) file = new OpenFile(sector);	
 
@@ -394,7 +394,7 @@ FileSystem::List(char *name)
 }
 
 void
-FileSystem::RecrusiveList(char *name)
+FileSystem::RecursiveList(char *name)
 {
 	Directory *Rootdirectory = new Directory(NumDirEntries);
 	Directory *Leafdirectory = new Directory(NumDirEntries);
@@ -416,9 +416,9 @@ FileSystem::RecrusiveList(char *name)
 		if(RootEntry[i].inUse){
 			strcat(CombinePath, RootEntry[i].name);			
 		
-		if(RootEntry[i].Directory) printf("--%s--Directory\n", CombinePath);
+		if(RootEntry[i].isDirectory) printf("--%s--Directory\n", CombinePath);
 		else printf("--%s--File\n", CombinePath);
-		if(RootEntry[i].Directory){
+		if(RootEntry[i].isDirectory){
 			OpenFile *file_recur = new OpenFile(RootEntry[i].sector);
 			Leafdirectory->FetchFrom(file_recur);
 			delete file_recur;

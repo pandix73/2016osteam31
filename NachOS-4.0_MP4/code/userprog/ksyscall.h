@@ -41,7 +41,7 @@ int SysCreate(char *filename, int size)
 }
 int SysOpen(char *filename)
 {
-	return kernel->interrupt->OpenFile(filename);
+	return kernel->interrupt->Open(filename);
 }
 int SysWrite(char *buffer, int size, int ID)
 {

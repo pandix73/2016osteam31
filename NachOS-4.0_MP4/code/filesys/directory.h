@@ -31,6 +31,7 @@
 
 class DirectoryEntry {
   public:
+	bool isDirectory;			//Check if it is Directory
     bool inUse;				// Is this directory entry in use?
     int sector;				// Location on disk to find the 
 					//   FileHeader for this file 
@@ -61,7 +62,7 @@ class Directory {
     int Find(char *name);		// Find the sector number of the 
 					// FileHeader for file: "name"
 
-    bool Add(char *name, int newSector);  // Add a file name into the directory
+    bool Add(char *name, int newSector, bool isDirectory);  // Add a file name into the directory
 
     bool Remove(char *name);		// Remove a file from the directory
 
@@ -70,6 +71,8 @@ class Directory {
     void Print();			// Verbose print of the contents
 					//  of the directory -- all the file
 					//  names and their contents.
+    int FindPath(char *name);
+    DirectoryEntry* getTable(){return table;}
 
   private:
   

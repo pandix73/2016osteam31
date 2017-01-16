@@ -77,15 +77,15 @@ class FileSystem {
 	// MP4 mod tag
 	~FileSystem();
 	void SplitPath(char *FullPath, char *Path, char *filename);
-    bool Create(char *name, int initialSize, bool Directory);  	
+    bool Create(char *name, int initialSize, bool isDirectory);  	
 					// Create a file (UNIX creat)
 
     OpenFile* Open(char *name); 	// Open a file (UNIX open)
 
     bool Remove(char *name);  		// Delete a file (UNIX unlink)
 
-    void List();			// List all the files in the file system
-	void RecursiveList();  	// List all the files in the file system in RecursiveList
+    void List(char *name);			// List all the files in the file system
+	void RecursiveList(char *name);  	// List all the files in the file system in RecursiveList
     void Print();			// List all the files and their contents
 
   private:

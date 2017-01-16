@@ -98,7 +98,7 @@ ExceptionHandler(ExceptionType which)
 			char *filename = &(kernel->machine->mainMemory[val]); 
 			int FileId = SysOpen(filename);
 			cout<<"--OPEN in exec FileID = "<<FileId<<endl;
-			kernel->machine->WriteRegister(2, (int), FileId);
+			kernel->machine->WriteRegister(2, (int)FileId);
 			}
 			kernel->machine->WriteRegister(PrevPCReg, kernel->machine->ReadRegister(PCReg));
 			kernel->machine->WriteRegister(PCReg, kernel->machine->ReadRegister(PCReg)+4);
@@ -118,7 +118,7 @@ ExceptionHandler(ExceptionType which)
 			}
 			kernel->machine->WriteRegister(PrevPCReg, kernel->machine->ReadRegister(PCReg));
 			kernel->machine->WriteRegister(PCReg, kernel->machine->ReadRegister(PCReg)+4);
-			kernel->machine->WriteRegister(NextPCReg, kernel->macine->ReadRegister(PCReg)+4);
+			kernel->machine->WriteRegister(NextPCReg, kernel->machine->ReadRegister(PCReg)+4);
 			return;
 			ASSERTNOTREACHED();
 			break;
@@ -147,7 +147,7 @@ ExceptionHandler(ExceptionType which)
 			}
 			kernel->machine->WriteRegister(PrevPCReg, kernel->machine->ReadRegister(PCReg));
 			kernel->machine->WriteRegister(PCReg, kernel->machine->ReadRegister(PCReg)+4);
-			kernel->machine->writeRegister(NextPCReg, kernel->machine->ReadRegister(PCReg)+4);
+			kernel->machine->WriteRegister(NextPCReg, kernel->machine->ReadRegister(PCReg)+4);
 			return;
 			ASSERTNOTREACHED();
 			break;

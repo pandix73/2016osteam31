@@ -98,7 +98,7 @@ Copy(char *from, char *to)
 
 // Create a Nachos file of the same length
     DEBUG('f', "Copying file " << from << " of size " << fileLength <<  " to file " << to);
-    if (!kernel->fileSystem->Create(to, fileLength)) {   // Create Nachos file
+    if (!kernel->fileSystem->Create(to, fileLength, false)) {   // Create Nachos file
         printf("Copy: couldn't create output file %s\n", to);
         Close(fd);
         return;

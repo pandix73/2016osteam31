@@ -23,6 +23,7 @@
 #include "utility.h"
 #include "filehdr.h"
 #include "directory.h"
+#include "filesys.h"
 
 //----------------------------------------------------------------------
 // Directory::Directory
@@ -130,7 +131,7 @@ Directory::Find(char *name)
 //----------------------------------------------------------------------
 
 bool
-Directory::Add(char *name, int newSector)
+Directory::Add(char *name, int newSector, bool isDirectory)
 { 
     if (FindIndex(name) != -1)
 	return FALSE;
@@ -140,6 +141,7 @@ Directory::Add(char *name, int newSector)
             table[i].inUse = TRUE;
             strncpy(table[i].name, name, FileNameMaxLen); 
             table[i].sector = newSector;
+			table[i].isDirectory = isDirectory;
         return TRUE;
 	}
     return FALSE;	// no space.  Fix when we have extensible files.
@@ -197,4 +199,45 @@ Directory::Print()
 	}
     printf("\n");
     delete hdr;
+}
+
+int
+Directory::FindPath(char *name)
+{
+	
+	char rootPath[256];
+	char restPath[256];
+	
+	if (name[1] == '\0') {
+		return 1; // root, return directory sector
+	} else {
+		bool onelevel = true;
+		int split = 0;
+		for(int i = 0; name[i] != '\0'; i++){
+			if (name[i] == '/'){
+				strncpy(rootPath, name, i);
+				rootPath[i] = '\0';
+				onelevel = false;
+				split = i;
+				break;
+			}
+		}
+		if (onelevel) {
+			strcpy(rootPath, name);
+			strcat(rootPath, "\0");
+			return Find(rootPath);
+		} else {
+			int sector = Find(rootPath);
+			if(sector == -1) return -1;
+			Directory *directory = new Directory(10); // 9+1
+			OpenFile *directoryFile = new OpenFile(sector);
+			directory->FetchFrom(directoryFile);
+			for(int i = 0; name[split+i] != '\0'; i++)
+				restPath[i] = name[split+i];
+			sector = directory->FindPath(restPath);
+			delete directory;
+			delete directoryFile;
+			return sector;
+		}		
+	}
 }
