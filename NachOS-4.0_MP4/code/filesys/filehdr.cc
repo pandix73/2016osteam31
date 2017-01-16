@@ -85,7 +85,7 @@ FileHeader::Allocate(PersistentBitmap *freeMap, int fileSize)
 
 
 	if(fileSize > 0){
-		cout<<"Now Remain fileSize is =>"<<fileSize;
+	//	cout<<"Now Remain fileSize is =>"<<fileSize;
 		nextSector = freeMap->FindAndSet();
 		if(nextSector == -1)return FALSE;
 		nextHeader = new FileHeader;
