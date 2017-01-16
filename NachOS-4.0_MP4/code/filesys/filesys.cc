@@ -354,8 +354,8 @@ FileSystem::Remove(char *name)
 	directory->Remove(filename);
 	FileHeader *iterHdr = fileHdr;
 	int iterSector = sector;
-	for(iterHdr = fileHdr; iterHdr == NULL; iterHdr = iterHdr->getNextFHdr){
-		freemap->Clear(iterSector);
+	for(iterHdr = fileHdr; iterHdr == NULL; iterHdr = iterHdr->getNextHeader()){
+		freeMap->Clear(iterSector);
 		iterSector = iterHdr->getNextSector();
 	}
 

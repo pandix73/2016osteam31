@@ -69,7 +69,7 @@ FileHeader::~FileHeader()
 bool
 FileHeader::Allocate(PersistentBitmap *freeMap, int fileSize)
 { 
-    numBytes = fileSize;
+    numBytes = (fileSize < MaxFileSize) ? fileSize : MaxFileSize;
     numSectors  = divRoundUp(fileSize, SectorSize);
     if (freeMap->NumClear() < numSectors)
 	return FALSE;		// not enough space
@@ -80,6 +80,14 @@ FileHeader::Allocate(PersistentBitmap *freeMap, int fileSize)
 	// we expect this to succeed
 	ASSERT(dataSectors[i] >= 0);
     }
+
+	fileSize -= numBytes;
+	if(fileSize > 0){
+		nextSector = freeMap->FindAndSet();
+		if(nextSector == -1)return FALSE;
+		nextHeader = new FileHeader;
+		return nextHeader->Allocate(freeMap, fileSize); // recursively allocate
+	}
     return TRUE;
 }
 
@@ -97,6 +105,7 @@ FileHeader::Deallocate(PersistentBitmap *freeMap)
 	ASSERT(freeMap->Test((int) dataSectors[i]));  // ought to be marked!
 	freeMap->Clear((int) dataSectors[i]);
     }
+	if(nextSector != -1) nextHeader->Deallocate(freeMap);
 }
 
 //----------------------------------------------------------------------
@@ -115,6 +124,10 @@ FileHeader::FetchFrom(int sector)
 		MP4 Hint:
 		After you add some in-core informations, you will need to rebuild the header's structure
 	*/
+	if(nextSector != -1){
+		nextHeader = new FileHeader;
+		nextHeader->FetchFrom(nextSector);
+	}
 	
 }
 
@@ -139,6 +152,8 @@ FileHeader::WriteBack(int sector)
 		...
 	*/
 	
+	if(nextSector != -1) nextHeader->WriteBack(nextSector);
+
 }
 
 //----------------------------------------------------------------------
@@ -154,7 +169,10 @@ FileHeader::WriteBack(int sector)
 int
 FileHeader::ByteToSector(int offset)
 {
-    return(dataSectors[offset / SectorSize]);
+	if(offset/SectorSize < NumDirect)
+	    return(dataSectors[offset / SectorSize]);
+	else
+		return nextHeader->ByteToSector(offset - MaxFileSize);
 }
 
 //----------------------------------------------------------------------
