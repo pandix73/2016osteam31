@@ -213,7 +213,7 @@ Directory::FindPath(char *name)
 	} else {
 		bool onelevel = true;
 		int split = 0;
-		for(int i = 0; name[i] != '\0'; i++){
+		for(int i = 1; name[i] != '\0'; i++){
 			if (name[i] == '/'){
 				strncpy(rootPath, name, i);
 				rootPath[i] = '\0';
@@ -229,11 +229,20 @@ Directory::FindPath(char *name)
 		} else {
 			int sector = Find(rootPath);
 			if(sector == -1) return -1;
-			Directory *directory = new Directory(10); // 9+1
+			Directory *directory = new Directory(DirectoryFileSize); // 9+1
 			OpenFile *directoryFile = new OpenFile(sector);
 			directory->FetchFrom(directoryFile);
-			for(int i = 0; name[split+i] != '\0'; i++)
+			/*for(int i = 0; name[split+i] != '\0'; i++)
 				restPath[i] = name[split+i];
+			*/
+			for(int i = 1; i < strlen(name); i++)
+			{
+				if(name[i] == '/')
+				{
+					for(int j = 0; j < strlen(name)-i+1; j++) restPath[j] = name[j+i];
+					break;
+				}
+			}
 			sector = directory->FindPath(restPath);
 			delete directory;
 			delete directoryFile;

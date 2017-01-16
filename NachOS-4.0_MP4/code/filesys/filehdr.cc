@@ -53,6 +53,7 @@ FileHeader::FileHeader()
 //----------------------------------------------------------------------
 FileHeader::~FileHeader()
 {
+	delete nextHeader;
 	// nothing to do now
 }
 
@@ -71,10 +72,10 @@ bool
 FileHeader::Allocate(PersistentBitmap *freeMap, int fileSize)
 { 
     numBytes = (fileSize < MaxFileSize) ? fileSize : MaxFileSize;
-    numSectors  = divRoundUp(fileSize, SectorSize);
-    if (freeMap->NumClear() < numSectors)
+    numSectors  = divRoundUp(numBytes, SectorSize);
+    if (freeMap->NumClear() < divRoundUp(fileSize, SectorSize))
 	return FALSE;		// not enough space
-
+	fileSize -= numBytes;
     for (int i = 0; i < numSectors; i++) {
 	dataSectors[i] = freeMap->FindAndSet();
 	// since we checked that there was enough free space,
@@ -82,12 +83,13 @@ FileHeader::Allocate(PersistentBitmap *freeMap, int fileSize)
 	ASSERT(dataSectors[i] >= 0);
     }
 
-	fileSize -= numBytes;
+
 	if(fileSize > 0){
+		cout<<"Now Remain fileSize is =>"<<fileSize;
 		nextSector = freeMap->FindAndSet();
 		if(nextSector == -1)return FALSE;
 		nextHeader = new FileHeader;
-		return nextHeader->Allocate(freeMap, fileSize); // recursively allocate
+		if(!nextHeader->Allocate(freeMap, fileSize)) return FALSE; // recursively allocate
 	}
     return TRUE;
 }

@@ -63,7 +63,6 @@ Kernel::Kernel(int argc, char **argv)
 #ifndef FILESYS_STUB
 		} else if (strcmp(argv[i], "-f") == 0) {
 	    	formatFlag = TRUE;
-			cout<<"catch -f"<<endl;
 #endif
         } else if (strcmp(argv[i], "-n") == 0) {
             ASSERT(i + 1 < argc);   // next argument is float

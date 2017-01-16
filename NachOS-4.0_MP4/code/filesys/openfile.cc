@@ -116,9 +116,16 @@ int
 OpenFile::ReadAt(char *into, int numBytes, int position)
 {
     int fileLength = hdr->FileLength();
-    int i, firstSector, lastSector, numSectors;
-    char *buf;
+	FileHeader *recurHdr = hdr;
+	// for(recurHdr = hdr; recurHdr->getNextHeader() != NULL; recurHdr = recurHdr->getNextHeader()) fileLength += recurHdr->FileLength();    
+    while(recurHdr->getNextHeader() != NULL){
+        recurHdr = recurHdr->getNextHeader();
+        fileLength += recurHdr->FileLength();
+    }
 
+	int i, firstSector, lastSector, numSectors;
+    char *buf;
+	
     if ((numBytes <= 0) || (position >= fileLength))
     	return 0; 				// check request
     if ((position + numBytes) > fileLength)		
@@ -145,6 +152,13 @@ int
 OpenFile::WriteAt(char *from, int numBytes, int position)
 {
     int fileLength = hdr->FileLength();
+    FileHeader *recurHdr = hdr;
+    // for(recurHdr = hdr; recurHdr->getNextHeader() != NULL; recurHdr = recurHdr->getNextHeader()) fileLength += recurHdr->FileLength();    
+    while(recurHdr->getNextHeader() != NULL){
+        recurHdr = recurHdr->getNextHeader();
+        fileLength += recurHdr->FileLength();
+    }
+
     int i, firstSector, lastSector, numSectors;
     bool firstAligned, lastAligned;
     char *buf;

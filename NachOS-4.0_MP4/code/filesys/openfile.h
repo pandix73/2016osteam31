@@ -38,9 +38,7 @@ class OpenFile {
 		}	
     int WriteAt(char *from, int numBytes, int position) { 
     		Lseek(file, position, 0); 
-		cout<<"openfile s"<<endl;
 		WriteFile(file, from, numBytes); 
-		cout<<"openfile e"<<endl;
 		return numBytes;
 		}	
     int Read(char *into, int numBytes) {

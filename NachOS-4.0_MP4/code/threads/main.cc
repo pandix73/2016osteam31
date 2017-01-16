@@ -94,6 +94,7 @@ Copy(char *from, char *to)
 // Figure out length of UNIX file
     Lseek(fd, 0, 2);            
     fileLength = Tell(fd);
+//	cout << "Length of File is ==> "<< fileLength <<endl;
     Lseek(fd, 0, 0);
 
 // Create a Nachos file of the same length

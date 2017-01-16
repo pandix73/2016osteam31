@@ -55,7 +55,7 @@
 // Sectors containing the file headers for the bitmap of free sectors,
 // and the directory of files.  These file headers are placed in well-known 
 // sectors, so that they can be located on boot-up.
-#define FreeMapSector 		0
+/*#define FreeMapSector 		0
 #define DirectorySector 	1
 
 // Initial file sizes for the bitmap and directory; until the file system
@@ -63,7 +63,7 @@
 // of files that can be loaded onto the disk.
 #define FreeMapFileSize 	(NumSectors / BitsInByte)
 #define NumDirEntries 		64
-#define DirectoryFileSize 	(sizeof(DirectoryEntry) * NumDirEntries)
+#define DirectoryFileSize 	(sizeof(DirectoryEntry) * NumDirEntries)*/
 
 //----------------------------------------------------------------------
 // FileSystem::FileSystem
@@ -93,13 +93,11 @@ FileSystem::FileSystem(bool format)
 		// (make sure no one else grabs these!)
 		freeMap->Mark(FreeMapSector);	    
 		freeMap->Mark(DirectorySector);
-		cout<<"mark finish"<<endl;
 		// Second, allocate space for the data blocks containing the contents
 		// of the directory and bitmap files.  There better be enough space!
 
 		ASSERT(mapHdr->Allocate(freeMap, FreeMapFileSize));
 		ASSERT(dirHdr->Allocate(freeMap, DirectoryFileSize));
-		cout<<"test allocate finish"<<endl;
 		// Flush the bitmap and directory FileHeaders back to disk
 		// We need to do this before we can "Open" the file, since open
 		// reads the file header off of disk (and currently the disk has garbage
@@ -108,14 +106,12 @@ FileSystem::FileSystem(bool format)
         DEBUG(dbgFile, "Writing headers back to disk.");
 		mapHdr->WriteBack(FreeMapSector);    
 		dirHdr->WriteBack(DirectorySector);
-		cout<<"writeback finish"<<endl;
 		// OK to open the bitmap and directory files now
 		// The file system operations assume these two files are left open
 		// while Nachos is running.
 
         freeMapFile = new OpenFile(FreeMapSector);
         directoryFile = new OpenFile(DirectorySector);
-     	cout<<"new file finish"<<endl;
 		// Once we have the files "open", we can write the initial version
 		// of each file back to disk.  The directory at this point is completely
 		// empty; but the bitmap has been changed to reflect the fact that
@@ -125,7 +121,6 @@ FileSystem::FileSystem(bool format)
         DEBUG(dbgFile, "Writing bitmap and directory back to disk.");
 		freeMap->WriteBack(freeMapFile);	 // flush changes to disk
 		directory->WriteBack(directoryFile);
-		cout<<"write back finish"<<endl;
 		if (debug->IsEnabled('f')) {
 			freeMap->Print();
 			directory->Print();
@@ -203,7 +198,8 @@ FileSystem::SplitPath(char *FullPath, char *Path, char *filename)
 		filename[j] = FullPath[i];
 	}
 	filename[j] = '\0';
-
+	
+	printf("In SplitPath function ==>  %s ---> %s ----> %s\n", FullPath, Path, filename);
 }
 
 bool
@@ -235,7 +231,7 @@ FileSystem::Create(char *name, int initialSize, bool isDirectory)
 	directory = new Directory(NumDirEntries);
 	directory->FetchFrom(file);
 		
-    if (directory->Find(name) != -1)
+    if (directory->Find(filename) != -1)
       success = FALSE;			// file is already in directory
     else {	
         freeMap = new PersistentBitmap(freeMapFile,NumSectors);
@@ -246,7 +242,7 @@ FileSystem::Create(char *name, int initialSize, bool isDirectory)
             success = FALSE;	// no space in directory
 	else {
     	    hdr = new FileHeader;
-	    if (!hdr->Allocate(freeMap, initialSize))
+	    if (!hdr->Allocate(freeMap, size))
             	success = FALSE;	// no space on disk for data
 	    else {	
 	    	success = TRUE;
@@ -293,7 +289,7 @@ FileSystem::Open(char *name)
 
     DEBUG(dbgFile, "Opening file" << name);
     directory->FetchFrom(directoryFile);
-    sector = directory->Find(name); 
+    sector = directory->FindPath(name); 
     if (sector >= 0) 		
 	openFile = new OpenFile(sector);	// name was found in directory 
     delete directory;
@@ -402,7 +398,7 @@ FileSystem::RecursiveList(char *name)
 	int sector;
 	char CombinePath[256];
 
-	if(strlen(name) == 1) name = '\0';
+	if(strlen(name) == 1) name[0] = '\0';
 
 	strcpy(CombinePath, name);
 	Rootdirectory->FetchFrom(directoryFile);

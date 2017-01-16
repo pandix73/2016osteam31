@@ -364,7 +364,6 @@ void
 WriteFile(int fd, char *buffer, int nBytes)
 {
     int retVal = write(fd, buffer, nBytes);
-    cout<< retVal << ' '<< nBytes<<endl;
 	ASSERT(retVal == nBytes);
 }
 
